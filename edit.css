@@ -2,12 +2,13 @@ body {
     margin: 0;
     padding: 0;
     background-color: #fff;
+    font-family: Fira Sans;
+    margin: 15px 30px;
 }
 
 .rendererView {
     display: block;
-    outline: 2px solid red;
-    width: 200px;
+    width: 600px;
     height: 200px;
     image-rendering: optimizeSpeed;
     image-rendering: -moz-crisp-edges;

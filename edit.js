@@ -1,8 +1,7 @@
-var viewWidth = 10;
-var viewHeight = 10;
+var size = { x: 300, y: 100 };
 
 // Create a pixi renderer
-var renderer = PIXI.autoDetectRenderer(viewWidth, viewHeight);
+var renderer = PIXI.autoDetectRenderer(size.x, size.y);
 renderer.view.className = "rendererView";
 
 
@@ -11,44 +10,46 @@ class CircleMesh extends PIXI.AbstractFilter {
 		var vertexShader = null;
 		var fragmentShader = `
 
-/**
- * Convert r, g, b to normalized vec3
- */
-vec3 rgb(float r, float g, float b) {
-	return vec3(r / 255.0, g / 255.0, b / 255.0);
-}
+precision mediump float;
+
+varying vec2 vTextureCoord;
+
+uniform vec4 dimensions;
+uniform float radius;
+uniform sampler2D uSampler;
 
 /**
  * Draw a circle at vec2 pos with radius rad and
  * color color.
  */
-vec4 circle(vec2 uv, vec2 pos, float rad, vec3 color) {
-	float d = length(pos - uv) - rad;
-    if (d >= 0.0 && d <= 1.0) d = 0.0;
-    else d = 1.0;
-	return vec4(color, 1.0 - d);
+
+void main(void) {
+	vec2 pos = vTextureCoord*dimensions.xy;
+	vec2 center = dimensions.xy*0.5;
+	vec3 color = vec3(1.0, 1.0, 0);
+	float d = clamp(length(pos - center) - radius, 0.0, 2.0);
+    // if (d > 0.0 && d < 1.0)
+    // 	gl_FragColor = vec4(color*d, 1.0);
+   	// else if (d >= 1.0 && d < 2.0)
+    // 	gl_FragColor = vec4(color*(2.0-d), 1.0);
+    if (d > 0.0 && d <= 1.0)
+    	gl_FragColor = vec4(color, 1.0);
+    else
+    	gl_FragColor = vec4(0.0);
 }
 
-void mainImage( out vec4 fragColor, in vec2 fragCoord ) {
-
-	vec2 uv = fragCoord.xy;
-	vec2 center = iResolution.xy * 0.5;
-	float radius = 0.2 * iResolution.y;
-
-    // Background layer
-	vec4 layer1 = vec4(rgb(210.0, 222.0, 228.0), 1.0);
-	
-	// Circle
-	vec3 red = rgb(225.0, 95.0, 60.0);
-	vec4 layer2 = circle(uv, center, radius, red);
-	
-	// Blend the two
-	fragColor = mix(layer1, layer2, layer2.a);
-
-}
 		`;
 
-		super(vertexShader, fragmentShader, {});
+		super(vertexShader, fragmentShader, {
+			dimensions: {
+      			type: '4fv',
+      			value: new Float32Array([0, 0, 0, 0])
+    		},
+    		radius: {
+    			type: 'f',
+    			value: 50.0,
+    		}
+		});
 	}
 }
 
@@ -57,17 +58,34 @@ void mainImage( out vec4 fragColor, in vec2 fragCoord ) {
 document.body.appendChild(renderer.view);
 
 var playpen = new PIXI.Graphics();
-playpen.width = 512;
-playpen.height = 512;
+playpen.width = size.x;
+playpen.height = size.y;
 playpen.interactive = true;
-playpen.hitArea = new PIXI.Rectangle(0, 0, 512, 512);
+// playpen.hitArea = new PIXI.Rectangle(0, 0, playpen.width, playpen.height);
+
+var circle = new CircleMesh;
+playpen.filters = [circle];
+
+playpen.beginFill( 0xFFFFFFFF );
+playpen.drawRect(0, 0, size.x, size.y);
+playpen.endFill();
 
 playpen.mousedown = playpen.touchstart = function(item){
-  var coords = item.data.getLocalPosition( playpen );
-	playpen.beginFill( 0xFFFFFFFF );
-	console.log(coords)
-	playpen.drawRect(Math.floor(coords.x), Math.floor(coords.y), 1, 1);
-	playpen.endFill();
+ //  var coords = item.data.getLocalPosition( playpen );
+	// playpen.beginFill( 0xFFFFFFFF );
+	// console.log(coords)
+	// playpen.drawRect(Math.floor(coords.x), Math.floor(coords.y), 1, 1);
+	// playpen.endFill();
+	renderer.render(playpen);	
+};
+
+playpen.mousemove = playpen.touchstart = function(item){
+	var coords = item.data.getLocalPosition( playpen );
+	circle.uniforms.radius.value = Math.sqrt(Math.pow(coords.x - size.x/2, 2) + Math.pow(coords.y - size.y/2, 2))
+	// playpen.beginFill( 0xFFFFFFFF );
+	// console.log(coords)
+	// playpen.drawRect(Math.floor(coords.x), Math.floor(coords.y), 1, 1);
+	// playpen.endFill();
 	renderer.render(playpen);	
 };
 
