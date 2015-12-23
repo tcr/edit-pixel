@@ -4,6 +4,7 @@ body {
     background-color: #fff;
     font-family: Fira Sans;
     margin: 15px 30px;
+    cursor: crosshair;
 }
 
 .rendererView {
