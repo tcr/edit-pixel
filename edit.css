@@ -7,7 +7,7 @@ body {
     cursor: crosshair;
 }
 
-.rendererView {
+canvas {
     display: block;
     width: 600px;
     height: 200px;
@@ -17,4 +17,5 @@ body {
     image-rendering: optimize-contrast;
     image-rendering: pixelated;
     -ms-interpolation-mode: nearest-neighbor;
+    outline: 1px solid grey;
 }
