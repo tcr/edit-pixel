@@ -1,13 +1,14 @@
 import shapes from './shapes';
+import { GridFilter } from './meshes';
 
 // create a renderer instance
-var renderer = new PIXI.WebGLRenderer(100, 100, {
+var renderer = new PIXI.WebGLRenderer(600, 600, {
   transparent: true,
 });
 document.body.insertBefore(renderer.view, document.body.firstChild);
 
-renderer.view.style.height = '200px';
-renderer.view.style.width = '200px';
+renderer.view.style.height = '600px';
+renderer.view.style.width = '600px';
 
 var RADIUS_STATE = 8;
 var ALIAS_STATE = false;
@@ -23,7 +24,7 @@ var background = new PIXI.Graphics();
 background.beginFill(0xccffff);
 background.drawRect(0, 0, 100, 100);
 
-var bgcache = new PIXI.RenderTexture(renderer, 100, 100);
+var bgcache = new PIXI.RenderTexture(renderer, 100, 100, PIXI.SCALE_MODES.NEAREST);
 bgcache.render(background);
 
 var bgsprite = new PIXI.Sprite(bgcache);
@@ -33,15 +34,29 @@ centerdot.beginFill(0xff0000);
 centerdot.drawRect(100/2 - 1, 100/2 - 1, 3, 3);
 
 var container = new PIXI.Container();
+container.scale.x = 6.0;
+container.scale.y = 6.0;
 container.addChild(bgsprite);
 // container.addChild(centerdot);
+
+var gridGraphics = new PIXI.Graphics();
+gridGraphics.beginFill(0xFFFF00);
+gridGraphics.drawRect(0, 0, 600, 600);
+
+var grid = new GridFilter();
+grid.uniforms.radius.value = 6.0;
+gridGraphics.filters = [ grid ];
+
+var realContainer = new PIXI.Container();
+realContainer.addChild(container);
+realContainer.addChild(gridGraphics);
 
 function render() {
   // DRAW DAT CENTER DOT
   if (CIRC_DRAW) {
     shapes.update(ALIAS_STATE, Math.max(RADIUS_STATE, 1), ROT_BY);
   }
-  renderer.render(container);
+  renderer.render(realContainer);
 }
 
 window.onkeydown = function (e) {
@@ -81,7 +96,7 @@ bgsprite.mousedown = function (item) {
   render();
 };
 
-bgsprite.mouseup = function (item) {
+window.onmouseup = function () {
   CIRC_DRAW = false;
   container.removeChild(shapes.sprite);
 

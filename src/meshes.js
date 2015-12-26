@@ -52,3 +52,40 @@ void main(void) {
     });
   }
 }
+
+export class GridFilter extends PIXI.AbstractFilter {
+  constructor() {
+    var vertexShader = null;
+    var fragmentShader = `
+
+precision mediump float;
+
+varying vec2 vTextureCoord;
+uniform sampler2D texture;
+uniform vec4 dimensions;
+uniform float radius;
+
+void main(void) {
+  vec2 trueCoords = (vTextureCoord * dimensions.xy) + vec2(1.0, 1.0);
+  vec4 cur = texture2D(texture, vTextureCoord);
+  if (step(1.0, mod(trueCoords.x, radius)) == 0.0 || step(1.0, mod(trueCoords.y, radius)) == 0.0) {
+    gl_FragColor = vec4(0.0, 0.0, 0.0, 0.5);
+  } else {
+    gl_FragColor = vec4(0.0, 0.0, 0.0, 0.0);
+  }
+}
+
+    `;
+
+    super(vertexShader, fragmentShader, {
+      dimensions: {
+        type: '4fv',
+        value: new Float32Array([0, 0, 0, 0])
+      },
+      radius: {
+        type: 'f',
+        value: 1.0,
+      }
+    });
+  }
+}
