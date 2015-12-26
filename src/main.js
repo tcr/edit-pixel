@@ -34,7 +34,7 @@ centerdot.drawRect(100/2 - 1, 100/2 - 1, 3, 3);
 
 var container = new PIXI.Container();
 container.addChild(bgsprite);
-container.addChild(centerdot);
+// container.addChild(centerdot);
 
 function render() {
   // DRAW DAT CENTER DOT
