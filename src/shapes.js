@@ -65,8 +65,17 @@ function drawCanvasCircle (alias, radius, rot, thickness) {
   ctx.clearRect(0, 0, len, len);
 
   ctx.beginPath();
+
   var cx = Math.floor(len / 2);
   var cy = Math.floor(len / 2);
+
+  // Shortcut for single dot.
+  if (alias && radius <= 1) {
+    ctx.fillStyle = 'black';
+    ctx.rect(cx - .5, cy - .5, 1, 1);
+    ctx.fill();
+    return len;
+  }
 
   ctx.translate(Math.floor(len / 2), Math.floor(len / 2));
   // ctx.rotate(rot);
@@ -106,7 +115,7 @@ function circleSprite (alias, radius, rot, fill) {
   // sprite.anchor = new PIXI.Point(50,50);
   // console.log(sprite.anchor);
 
-  if (alias) {
+  if (alias && radius > 1) {
     CAN_sprite.filters = [new OutlineMesh];
   } else {
     CAN_sprite.filters = null;
