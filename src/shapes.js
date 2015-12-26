@@ -120,8 +120,6 @@ function circleSprite (alias, radius, rot, fill) {
 
   out.height = CAN_len;
   out.width = CAN_len;
-  out.anchor.x = 0.5;
-  out.anchor.y = 0.5;
 }
 
 export default {
