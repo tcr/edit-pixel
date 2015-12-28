@@ -3,7 +3,14 @@ body {
     padding: 0;
     background-color: #fff;
     font-family: Fira Sans;
+    display: flex;
+}
+
+#panel-sidebar {
     margin: 15px 30px;
+}
+
+#panel-graphics {
     cursor: crosshair;
 }
 

@@ -4,7 +4,7 @@ import { GridFilter } from './meshes';
 // create a renderer instance
 var renderer = new PIXI.WebGLRenderer(600, 600);
 renderer.backgroundColor = 0xaaaaaa;
-document.body.insertBefore(renderer.view, document.body.firstChild);
+$('#panel-graphics').append(renderer.view);
 
 renderer.view.style.height = '600px';
 renderer.view.style.width = '600px';

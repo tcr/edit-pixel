@@ -5,10 +5,12 @@
     <link href='https://fonts.googleapis.com/css?family=Fira+Sans' rel='stylesheet' type='text/css'>
   </head>
   <body>
-	  <p>Click and drag. Hold down <kbd>A</kbd> to remove anti-aliasing.</p>
+    <div id="panel-sidebar">
+  	  <h1>Puck, a graphics editor</h1>
+	  <p>Click and drag.</p>
 	  <div id="toolconf-brush">
-	  	<p><label><input type="checkbox" id="toolconf-brush-alias"> Alias</label></p>
-	  	<p><label><input type="checkbox" id="toolconf-brush-grid"> Grid</label></p>
+	  	<p><label><input type="checkbox" id="toolconf-brush-alias"> Alias (keyboard: <kbd>A</kbd>)</label></p>
+	  	<p><label><input type="checkbox" id="toolconf-brush-grid"> Grid  (keyboard: <kbd>G</kbd>)</label></p>
 	  	<p><label><input type="range" id="toolconf-zoom" value="1" min="1" max="10"> Zoom (<span id="toolconf-zoom-readout">1</span>x)</label></p>
 	  	<p>
 	  		<button id="toolconf-color-black">Black</button>
@@ -19,6 +21,10 @@
 	  		<button id="toolconf-color-white">White</button>
 	  	</p>
 	  </div>
+	  <hr>
+	  <p><a href="http://github.com/tcr/edit-pixel">File issues on Github.</a>a></p>
+	</div>
+	<div id="panel-graphics"></div>
   </body>
 
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.0.0-alpha1/jquery.js"></script>
