@@ -35,11 +35,10 @@ void main(void) {
   // vec4 dr = downsample(texture2D(texture, vTextureCoord + vec2(+linewidthless, +linewidthless)/dimensions.xy));
 
   if (is_black(cur) && (is_white(up) || is_white(down) || is_white(left) || is_white(right))) { //} || is_white(ul) || is_white(dl) || is_white(ur) || is_white(dr))) {
-    gl_FragColor = vec4(0.0, 0.0, 0.0, 1.0);
+    gl_FragColor = vec4(1.0, 0.0, 0.0, 1.0);
   } else {
     gl_FragColor = vec4(0.0);
   }
-  // gl_FragColor = cur;
 }
 
     `;
@@ -69,7 +68,7 @@ void main(void) {
   vec2 trueCoords = (vTextureCoord * dimensions.xy) + vec2(1.0, 1.0);
   vec4 cur = texture2D(texture, vTextureCoord);
   if (step(1.0, mod(trueCoords.x, radius)) == 0.0 || step(1.0, mod(trueCoords.y, radius)) == 0.0) {
-    gl_FragColor = vec4(0.0, 0.0, 0.0, 0.5);
+    gl_FragColor = vec4(0.0, 0.0, 0.0, 0.25);
   } else {
     gl_FragColor = vec4(0.0, 0.0, 0.0, 0.0);
   }

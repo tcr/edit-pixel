@@ -36,7 +36,7 @@ function drawStar(ctx, cx,cy,spikes,outerRadius,innerRadius){
   ctx.stroke();
 }
 
-function drawCanvasCircle (alias, radius, rot, thickness) {
+function drawCanvasCircle (alias, radius, rot, stroke, thickness) {
   var fudge = 10;
 
   var len = (Math.floor(radius) * 2) + fudge;
@@ -71,7 +71,7 @@ function drawCanvasCircle (alias, radius, rot, thickness) {
 
   // Shortcut for single dot.
   if (alias && radius <= 1) {
-    ctx.fillStyle = 'black';
+    ctx.fillStyle = stroke;
     ctx.rect(cx - .5, cy - .5, 1, 1);
     ctx.fill();
     return len;
@@ -87,7 +87,7 @@ function drawCanvasCircle (alias, radius, rot, thickness) {
     ctx.fill();
   } else {
     ctx.lineWidth = thickness;
-    ctx.strokeStyle = 'black';
+    ctx.strokeStyle = stroke;
     ctx.stroke();
   }
 
@@ -103,9 +103,10 @@ function drawCanvasCircle (alias, radius, rot, thickness) {
   return len;
 }
 
-function circleSprite (alias, radius, rot, fill) {
+
+function circleSprite (alias, radius, rot, stroke) {
   // radius = 6;
-  var CAN_len = drawCanvasCircle(alias, radius, rot, 1);
+  var CAN_len = drawCanvasCircle(alias, radius, rot, stroke, 1);
 
   // sprite.anchor = new PIXI.Point(-can.width / 2, -can.height / 2);
   // console.log(Math.floor((100 / 2) - (can.width / 2)))

@@ -2,9 +2,8 @@ import shapes from './shapes';
 import { GridFilter } from './meshes';
 
 // create a renderer instance
-var renderer = new PIXI.WebGLRenderer(600, 600, {
-  transparent: true,
-});
+var renderer = new PIXI.WebGLRenderer(600, 600);
+renderer.backgroundColor = 0xaaaaaa;
 document.body.insertBefore(renderer.view, document.body.firstChild);
 
 renderer.view.style.height = '600px';
@@ -15,13 +14,14 @@ var ALIAS_STATE = false;
 var ROT_BY = 0;
 var CIRC_DRAW = false;
 var CIRC_CENTER = {x: 0, y: 0}
+var CIRC_COLOR = '#000000';
 
 // var bg = new PIXI.CanvasRenderer(100, 100, {
 //   transparent: true,
 // });
 
 var background = new PIXI.Graphics();
-background.beginFill(0xccffff);
+background.beginFill(0xffffff);
 background.drawRect(0, 0, 100, 100);
 
 // var bgsprite = new PIXI.Sprite(background);
@@ -36,25 +36,85 @@ var bgcache = new PIXI.RenderTexture(renderer, 100, 100, PIXI.SCALE_MODES.NEARES
 bgcache.render(container);
 
 var bgcacheSprite = new PIXI.Sprite(bgcache);
-bgcacheSprite.scale.x = 6.0;
-bgcacheSprite.scale.y = 6.0;
 
 var gridGraphics = new PIXI.Graphics();
 gridGraphics.beginFill(0xFFFF00);
-gridGraphics.drawRect(0, 0, 600, 600);
+gridGraphics.drawRect(0, 0, 100, 100);
+gridGraphics.visible = false;
 
 var grid = new GridFilter();
-grid.uniforms.radius.value = 6.0;
+grid.uniforms.radius.value = 1.0;
 gridGraphics.filters = [ grid ];
 
 var realContainer = new PIXI.Container();
 realContainer.addChild(bgcacheSprite);
-realContainer.addChild(gridGraphics);
+realContainer.scale.x = 1.0;
+realContainer.scale.y = 1.0;
+// realContainer.anchor.x = 0.5;
+// realContainer.anchor.y = 0.5;
+realContainer.position.x = 300 + -50;
+realContainer.position.y = 300 + -50;
+
+function setZoom (value) {
+  realContainer.scale.x = value;
+  realContainer.scale.y = value;
+  realContainer.position.x = 300 + -((100 * value) / 2);
+  realContainer.position.y = 300 + -((100 * value) / 2);
+  grid.uniforms.radius.value = value;
+  gridGraphics.visible = value >= 4.0;
+  // $('toolconf-brush-grid').prop('enabled', value >= 4.0);
+}
+
+setZoom(1.0);
+
+$('#toolconf-zoom').on('change mousedown mouseup mousemove', function () {
+  var checkbox = this;
+  setTimeout(function () {
+    var value = $(checkbox).val();
+    $('#toolconf-zoom-readout').text(value);
+    setZoom(value);
+  }, 0);
+})
+
+
+$('#toolconf-brush-grid').on('change', function () {
+  if ($(this).prop('checked')) {
+    realContainer.addChild(gridGraphics);
+    render();
+  } else {
+    realContainer.removeChild(gridGraphics);
+    render();
+  }
+});
+
+$('#toolconf-brush-alias').on('change', function () {
+  if ($(this).prop('checked')) {
+    ALIAS_STATE = true;
+  } else {
+    ALIAS_STATE = false;
+  }
+});
+
+$('#toolconf-color-black').on('click', function () {
+  CIRC_COLOR = '#000000';
+})
+$('#toolconf-color-red').on('click', function () {
+  CIRC_COLOR = '#ff0000';
+})
+$('#toolconf-color-blue').on('click', function () {
+  CIRC_COLOR = '#0000ff';
+})
+$('#toolconf-color-green').on('click', function () {
+  CIRC_COLOR = '#00ff00';
+})
+$('#toolconf-color-yellow').on('click', function () {
+  CIRC_COLOR = '#ffff00';
+})
 
 function render() {
   // DRAW DAT CENTER DOT
   if (CIRC_DRAW) {
-    shapes.update(ALIAS_STATE, Math.max(RADIUS_STATE, 0.5), ROT_BY);
+    shapes.update(ALIAS_STATE, Math.max(RADIUS_STATE, 0.15), ROT_BY, CIRC_COLOR);
     shapes.sprite.x = CIRC_CENTER.x - (shapes.sprite.width / 2);
     shapes.sprite.y = CIRC_CENTER.y - (shapes.sprite.height / 2);
   }
@@ -65,15 +125,13 @@ function render() {
 window.onkeydown = function (e) {
   if (e.keyCode == 65) {
     e.preventDefault();
-    ALIAS_STATE = true;
+    $('#toolconf-brush-alias').prop('checked', !$('#toolconf-brush-alias').prop('checked'));
+    $('#toolconf-brush-alias').trigger('change');
   }
-  render();
-};
-
-window.onkeyup = function (e) {
-  if (e.keyCode == 65) {
+  if (e.keyCode == 71) {
     e.preventDefault();
-    ALIAS_STATE = false;
+    $('#toolconf-brush-grid').prop('checked', !$('#toolconf-brush-grid').prop('checked'));
+    $('#toolconf-brush-grid').trigger('change');
   }
   render();
 };
@@ -115,9 +173,18 @@ function brush (coords) {
 
 var lastCoords = null;
 
+function getCoords(from, item) {
+  //TODO why is this so gross
+  var coords = item.data.getLocalPosition(from);
+  coords.x -= .2;
+  coords.y -= .2;
+  return coords;
+}
+
 bgcacheSprite.mousedown = function (item) {
   CIRC_DRAW = true;
-  var coords = item.data.getLocalPosition(bgcacheSprite);
+
+  var coords = getCoords(bgcacheSprite, item);
   
   // addShape(coords);
   // updateShape(coords);
@@ -161,7 +228,7 @@ window.onmouseup = function (item) {
 };
 
 bgcacheSprite.mousemove = function (item) {
-  var coords = item.data.getLocalPosition(bgcacheSprite);
+  var coords = getCoords(bgcacheSprite, item);
   // updateShape(coords);
 
   if (lastCoords) {
