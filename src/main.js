@@ -110,6 +110,9 @@ $('#toolconf-color-green').on('click', function () {
 $('#toolconf-color-yellow').on('click', function () {
   CIRC_COLOR = '#ffff00';
 })
+$('#toolconf-color-white').on('click', function () {
+  CIRC_COLOR = '#ffffff';
+})
 
 function render() {
   // DRAW DAT CENTER DOT
