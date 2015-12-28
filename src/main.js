@@ -1,6 +1,8 @@
 import shapes from './shapes';
 import { GridFilter } from './meshes';
 
+var size = {x: 50, y: 50};
+
 // create a renderer instance
 var renderer = new PIXI.WebGLRenderer(600, 600);
 renderer.backgroundColor = 0xaaaaaa;
@@ -15,6 +17,7 @@ var ROT_BY = 0;
 var CIRC_DRAW = false;
 var CIRC_CENTER = {x: 0, y: 0}
 var CIRC_COLOR = '#000000';
+var ZOOM_VALUE = 4.0;
 
 // var bg = new PIXI.CanvasRenderer(100, 100, {
 //   transparent: true,
@@ -22,7 +25,7 @@ var CIRC_COLOR = '#000000';
 
 var background = new PIXI.Graphics();
 background.beginFill(0xffffff);
-background.drawRect(0, 0, 100, 100);
+background.drawRect(0, 0, size.x, size.y);
 
 // var bgsprite = new PIXI.Sprite(background);
 // var centerdot = new PIXI.Graphics();
@@ -32,14 +35,14 @@ background.drawRect(0, 0, 100, 100);
 var container = new PIXI.Container();
 container.addChild(background);
 
-var bgcache = new PIXI.RenderTexture(renderer, 100, 100, PIXI.SCALE_MODES.NEAREST);
+var bgcache = new PIXI.RenderTexture(renderer, size.x, size.y, PIXI.SCALE_MODES.NEAREST);
 bgcache.render(container);
 
 var bgcacheSprite = new PIXI.Sprite(bgcache);
 
 var gridGraphics = new PIXI.Graphics();
 gridGraphics.beginFill(0xFFFF00);
-gridGraphics.drawRect(0, 0, 100, 100);
+gridGraphics.drawRect(0, 0, size.x, size.y);
 gridGraphics.visible = false;
 
 var grid = new GridFilter();
@@ -56,22 +59,25 @@ realContainer.position.x = 300 + -50;
 realContainer.position.y = 300 + -50;
 
 function setZoom (value) {
+  ZOOM_VALUE = value;
   realContainer.scale.x = value;
   realContainer.scale.y = value;
-  realContainer.position.x = 300 + -((100 * value) / 2);
-  realContainer.position.y = 300 + -((100 * value) / 2);
+  realContainer.position.x = 300 + -((size.x * value) / 2);
+  realContainer.position.y = 300 + -((size.y * value) / 2);
   grid.uniforms.radius.value = value;
   gridGraphics.visible = value >= 4.0;
+  $('#toolconf-zoom').val(value);
+  $('#toolconf-zoom-readout').text(value);
   // $('toolconf-brush-grid').prop('enabled', value >= 4.0);
+  render();
 }
 
-setZoom(1.0);
+setZoom(ZOOM_VALUE);
 
 $('#toolconf-zoom').on('change mousedown mouseup mousemove', function () {
   var checkbox = this;
   setTimeout(function () {
     var value = $(checkbox).val();
-    $('#toolconf-zoom-readout').text(value);
     setZoom(value);
   }, 0);
 })
@@ -114,8 +120,15 @@ $('#toolconf-color-white').on('click', function () {
   CIRC_COLOR = '#ffffff';
 })
 
+$('#panel-graphics').on('mousewheel', function(event) {
+  if (event.deltaY > 0) {
+    setZoom(Math.min(ZOOM_VALUE + 1, 10));
+  } else if (event.deltaY < 0) {
+    setZoom(Math.max(ZOOM_VALUE - 1, 1));
+  }
+});
+
 function render() {
-  // DRAW DAT CENTER DOT
   if (CIRC_DRAW) {
     shapes.update(ALIAS_STATE, Math.max(RADIUS_STATE, 0.15), ROT_BY, CIRC_COLOR);
     shapes.sprite.x = CIRC_CENTER.x - (shapes.sprite.width / 2);
@@ -143,7 +156,6 @@ bgcacheSprite.interactive = true;
 
 function updateShape (coords) {
   if (CIRC_DRAW) {
-    var size = {x: 100, y: 100};
     RADIUS_STATE = Math.sqrt(Math.pow(coords.x - CIRC_CENTER.x, 2) + Math.pow(coords.y - CIRC_CENTER.y, 2));
     ROT_BY = Math.atan2(coords.y - size.y/2, coords.x - size.x/2);
   }
