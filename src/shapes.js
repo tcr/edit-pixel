@@ -41,10 +41,10 @@ function drawStar(ctx, cx,cy,spikes,outerRadius,innerRadius){
   ctx.stroke();
 }
 
-function drawCanvasCircle (alias, radius, rot, stroke, thickness) {
+function drawCanvasCircle (alias, radius, rot, stroke, thickness, dofill) {
   radius -= 1;
   if (alias) {
-    radius = Math.max(Math.floor(radius) + .3, 1);
+    radius = Math.max(Math.floor(radius) + .3, .3);
   } else {
     radius = Math.max(radius, .5);
   }
@@ -52,7 +52,7 @@ function drawCanvasCircle (alias, radius, rot, stroke, thickness) {
   var len = Math.floor(radius*2) + 10;
 
   CAN_graphics.clear();
-  if (alias) {
+  if (alias && !dofill) {
     CAN_graphics.beginFill(0xffffff, 1.0);
     CAN_graphics.drawRect(0, 0, len, len);
     CAN_graphics.endFill();
@@ -83,7 +83,8 @@ function circleSprite (alias, radius, rot, stroke) {
   // CAN_stroke = stroke;
 
   // radius = 6;
-  var len = drawCanvasCircle(alias, radius, rot, stroke, 1);
+  var dofill = true;
+  var len = drawCanvasCircle(alias, radius, rot, stroke, 1, dofill);
 
   // sprite.anchor = new PIXI.Point(-can.width / 2, -can.height / 2);
   // console.log(Math.floor((100 / 2) - (can.width / 2)))
@@ -93,7 +94,7 @@ function circleSprite (alias, radius, rot, stroke) {
   // sprite.anchor = new PIXI.Point(50,50);
   // console.log(sprite.anchor);
 
-  if (alias) {
+  if (alias && !dofill) {
     outline.setColor(
       parseInt(stroke.substr(1).substr(0, 2), 16)/255.0,
       parseInt(stroke.substr(1).substr(2, 2), 16)/255.0,
