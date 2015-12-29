@@ -8,6 +8,7 @@ precision mediump float;
 varying vec2 vTextureCoord;
 uniform sampler2D texture;
 uniform vec4 dimensions;
+uniform vec4 newcolor;
 
 /**
  * Draw a circle at vec2 pos with radius rad and
@@ -16,8 +17,8 @@ uniform vec4 dimensions;
 
 #define THRESH 32.0
 #define downsample(X) step(THRESH/255.0, X)
-#define is_white(X) (X.a == 0.0)
-#define is_black(X) (X.a == 1.0)
+#define is_black(X) (X.rgb == vec3(0.0) && X.a == 1.0)
+#define is_white(X) (!is_black(X))
 
 #define linewidth 1.0
 // #define linewidthless (linewidth-1.0)
@@ -35,7 +36,7 @@ void main(void) {
   // vec4 dr = downsample(texture2D(texture, vTextureCoord + vec2(+linewidthless, +linewidthless)/dimensions.xy));
 
   if (is_black(cur) && (is_white(up) || is_white(down) || is_white(left) || is_white(right))) { //} || is_white(ul) || is_white(dl) || is_white(ur) || is_white(dr))) {
-    gl_FragColor = vec4(1.0, 0.0, 0.0, 1.0);
+    gl_FragColor = newcolor;
   } else {
     gl_FragColor = vec4(0.0);
   }
@@ -48,7 +49,15 @@ void main(void) {
         type: '4fv',
         value: new Float32Array([0, 0, 0, 0])
       },
+      newcolor: {
+        type: '4fv',
+        value: new Float32Array([0, 0, 0, 0]),
+      },
     });
+  }
+
+  setColor (r, g, b, a) {
+    this.uniforms.newcolor.value = new Float32Array([r, g, b, a]);
   }
 }
 

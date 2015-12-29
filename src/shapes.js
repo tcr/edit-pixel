@@ -1,17 +1,22 @@
 import { OutlineMesh } from './meshes';
 
-var CAN_graphics = new PIXI.CanvasRenderer(1, 1, {
-  transparent: true
-})
-var CAN_texture = PIXI.Texture.fromCanvas(CAN_graphics.view, PIXI.SCALE_MODES.NEAREST);
-var CAN_sprite = new PIXI.Sprite(CAN_texture);
+var bgrenderer = new PIXI.WebGLRenderer(600, 600);
 
-var bgrenderer = new PIXI.WebGLRenderer(1, 1, {
-  transparent: true,
-});
-
-var lastTexture = PIXI.Texture.fromCanvas(bgrenderer.view, PIXI.SCALE_MODES.NEAREST);
+var lastTexture = new PIXI.RenderTexture(bgrenderer, 100, 100, PIXI.SCALE_MODES.NEAREST);
 var out = new PIXI.Sprite(lastTexture);
+
+var CAN_graphics = new PIXI.Graphics();
+// CAN_graphics.cacheAsBitmap = true;
+
+var CAN_sprite = new PIXI.Container();
+// CAN_sprite.cacheAsBitmap = true;
+CAN_sprite.addChild(CAN_graphics);
+
+// var CAN_radius = null;
+// var CAN_alias = null;
+// var CAN_stroke = null;
+
+var outline = new OutlineMesh();
 
 function drawStar(ctx, cx,cy,spikes,outerRadius,innerRadius){
   var rot=Math.PI/2*3;
@@ -37,76 +42,48 @@ function drawStar(ctx, cx,cy,spikes,outerRadius,innerRadius){
 }
 
 function drawCanvasCircle (alias, radius, rot, stroke, thickness) {
-  var fudge = 10;
-
-  var len = (Math.floor(radius) * 2) + fudge;
-
+  // radius = 7;
   if (alias) {
-    radius = Math.floor(radius);
-    if (radius == 4) {
-      radius = 4.2;
-    }
-    if (radius == 6) {
-      radius = 5.9;
-    }
-    if (radius == 10) {
-      radius = 10.1;
-    }
-  }
-
-  CAN_graphics.resize(len, len);
-
-  var ctx = CAN_graphics.view.getContext('2d');
-  ctx.imageSmoothingEnabled = false;
-  ctx.webkitImageSmoothingEnabled = false;
-
-  ctx.translate(0.5, 0.5);
-
-  ctx.clearRect(0, 0, len, len);
-
-  ctx.beginPath();
-
-  var cx = Math.floor(len / 2);
-  var cy = Math.floor(len / 2);
-
-  // Shortcut for single dot.
-  if (alias && radius <= 1) {
-    ctx.fillStyle = stroke;
-    ctx.rect(cx - .5, cy - .5, 1, 1);
-    ctx.fill();
-    return len;
-  }
-
-  ctx.translate(Math.floor(len / 2), Math.floor(len / 2));
-  // ctx.rotate(rot);
-  ctx.arc(0, 0, radius, 0, 2 * Math.PI, false);
-  // drawStar(ctx, 0, 0, 5, radius, radius / 2);
-
-  if (alias) {
-    ctx.fillStyle = 'black';
-    ctx.fill();
+    radius = Math.max(Math.floor(radius) + .3, 1);
   } else {
-    ctx.lineWidth = thickness;
-    ctx.strokeStyle = stroke;
-    ctx.stroke();
+    radius = Math.max(radius, .5);
   }
 
-  // ctx.beginPath();
-  // ctx.strokeStyle = 'green';
-  // ctx.rect(Math.floor(len / 2) - 2, Math.floor(len / 2) - 2, 4, 4);
-  // ctx.stroke();
+  var len = Math.floor(radius*2) + 10;
 
-  // document.body.appendChild(CAN_graphics.view);
-  // CAN_graphics.view.style.width = '100px';
-  // CAN_graphics.view.style.height = '100px';
+  CAN_graphics.clear();
+  if (alias) {
+    CAN_graphics.beginFill(0xffffff, 1.0);
+    CAN_graphics.drawRect(0, 0, len, len);
+    CAN_graphics.endFill();
+    CAN_graphics.beginFill(0x000000);
+  } else {
+    CAN_graphics.beginFill(stroke, 0.0);
+    CAN_graphics.drawRect(0, 0, len, len);
+    CAN_graphics.endFill();
+    CAN_graphics.beginFill(parseInt(stroke.substr(1), 16));
+  }
+  if (alias) {
+    CAN_graphics.drawCircle(len/2 + .5, len/2 + .5, radius);
+  } else {
+    CAN_graphics.drawCircle(len/2 + .75, len/2, radius);
+  }
+  CAN_graphics.endFill();
 
   return len;
 }
 
 
 function circleSprite (alias, radius, rot, stroke) {
+  // if (CAN_radius == radius && CAN_alias == alias && CAN_stroke == stroke) {
+  //   return;
+  // }
+  // CAN_radius = radius;
+  // CAN_alias = alias;
+  // CAN_stroke = stroke;
+
   // radius = 6;
-  var CAN_len = drawCanvasCircle(alias, radius, rot, stroke, 1);
+  var len = drawCanvasCircle(alias, radius, rot, stroke, 1);
 
   // sprite.anchor = new PIXI.Point(-can.width / 2, -can.height / 2);
   // console.log(Math.floor((100 / 2) - (can.width / 2)))
@@ -116,23 +93,35 @@ function circleSprite (alias, radius, rot, stroke) {
   // sprite.anchor = new PIXI.Point(50,50);
   // console.log(sprite.anchor);
 
-  if (alias && radius > 1) {
-    CAN_sprite.filters = [new OutlineMesh];
+  if (alias) {
+    outline.setColor(
+      parseInt(stroke.substr(1).substr(0, 2), 16)/255.0,
+      parseInt(stroke.substr(1).substr(2, 2), 16)/255.0,
+      parseInt(stroke.substr(1).substr(4, 2), 16)/255.0,
+      1.0
+    );
+    CAN_sprite.filters = [outline];
   } else {
     CAN_sprite.filters = null;
   }
 
-  CAN_texture.update();
+  CAN_graphics.x = (100/2) - (len / 2);
+  CAN_graphics.y = (100/2) - (len / 2);
 
-  bgrenderer.resize(CAN_len, CAN_len);
-  bgrenderer.render(CAN_sprite);
-  lastTexture.update();
+  if (alias) {
+    lastTexture.render(CAN_sprite);
+    out.texture = lastTexture;
+  } else {
+    out.texture = CAN_graphics.generateTexture();
+  }
 
-  out.height = CAN_len;
-  out.width = CAN_len;
+  // bgrenderer.resize(len, len);
+  // bgrenderer.render(CAN_sprite);
+  // lastTexture.update();
 }
 
 export default {
   sprite: out,
   update: circleSprite,
+  renderer: bgrenderer,
 }
