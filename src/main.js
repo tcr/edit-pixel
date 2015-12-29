@@ -11,7 +11,7 @@ $('#panel-graphics').append(renderer.view);
 renderer.view.style.height = '600px';
 renderer.view.style.width = '600px';
 
-var RADIUS_STATE = 8;
+var RADIUS_STATE = 0;
 var ALIAS_STATE = false;
 var ROT_BY = 0;
 var CIRC_DRAW = false;
@@ -82,6 +82,21 @@ $('#toolconf-zoom').on('change mousedown mouseup mousemove', function () {
   }, 0);
 })
 
+function setBrushSize(value) {
+  RADIUS_STATE = value;
+  $('#toolconf-brush-size').val(value);
+  $('#toolconf-brush-size-readout').text(value);
+  render();
+}
+
+$('#toolconf-brush-size').on('change mousedown mouseup mousemove', function () {
+  var checkbox = this;
+  setTimeout(function () {
+    var value = $(checkbox).val();
+    setBrushSize(value);
+  }, 0);
+})
+
 
 $('#toolconf-brush-grid').on('change', function () {
   if ($(this).prop('checked')) {
@@ -130,7 +145,7 @@ $('#panel-graphics').on('mousewheel', function(event) {
 
 function render() {
   if (CIRC_DRAW) {
-    shapes.update(ALIAS_STATE, Math.max(RADIUS_STATE, 0.15), ROT_BY, CIRC_COLOR);
+    shapes.update(ALIAS_STATE, RADIUS_STATE, ROT_BY, CIRC_COLOR);
     shapes.sprite.x = CIRC_CENTER.x - (shapes.sprite.width / 2);
     shapes.sprite.y = CIRC_CENTER.y - (shapes.sprite.height / 2);
   }
@@ -156,7 +171,7 @@ bgcacheSprite.interactive = true;
 
 function updateShape (coords) {
   if (CIRC_DRAW) {
-    RADIUS_STATE = Math.sqrt(Math.pow(coords.x - CIRC_CENTER.x, 2) + Math.pow(coords.y - CIRC_CENTER.y, 2));
+    // RADIUS_STATE = Math.sqrt(Math.pow(coords.x - CIRC_CENTER.x, 2) + Math.pow(coords.y - CIRC_CENTER.y, 2));
     ROT_BY = Math.atan2(coords.y - size.y/2, coords.x - size.x/2);
   }
 }

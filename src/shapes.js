@@ -42,7 +42,7 @@ function drawStar(ctx, cx,cy,spikes,outerRadius,innerRadius){
 }
 
 function drawCanvasCircle (alias, radius, rot, stroke, thickness) {
-  // radius = 7;
+  radius -= 1;
   if (alias) {
     radius = Math.max(Math.floor(radius) + .3, 1);
   } else {
