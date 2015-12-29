@@ -58,7 +58,7 @@ function drawCanvasCircle (alias, radius, rot, stroke, thickness, dofill) {
     CAN_graphics.endFill();
     CAN_graphics.beginFill(0x000000);
   } else {
-    CAN_graphics.beginFill(stroke, 0.0);
+    CAN_graphics.beginFill(0x000000, 0.0);
     CAN_graphics.drawRect(0, 0, len, len);
     CAN_graphics.endFill();
     CAN_graphics.beginFill(parseInt(stroke.substr(1), 16));
@@ -110,6 +110,7 @@ function circleSprite (alias, radius, rot, stroke) {
   CAN_graphics.y = (100/2) - (len / 2);
 
   if (alias) {
+    lastTexture.clear();
     lastTexture.render(CAN_sprite);
     out.texture = lastTexture;
   } else {
