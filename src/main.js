@@ -74,16 +74,18 @@ function setBrushSize(value) {
 }
 
 function render() {
-  if (CIRC_DRAW) {
+  // if (CIRC_DRAW) {
     shapes.update(ALIAS_STATE, RADIUS_STATE, ROT_BY, CIRC_COLOR);
     shapes.sprite.x = CIRC_CENTER.x - (shapes.sprite.width / 2);
     shapes.sprite.y = CIRC_CENTER.y - (shapes.sprite.height / 2);
-  }
+  // }
   bgcache.render(container);
   renderer.render(realContainer);
 }
 
 function updateShape (coords) {
+  CIRC_CENTER.x = coords.x;
+  CIRC_CENTER.y = coords.y;
   if (CIRC_DRAW) {
     // RADIUS_STATE = Math.sqrt(Math.pow(coords.x - CIRC_CENTER.x, 2) + Math.pow(coords.y - CIRC_CENTER.y, 2));
     ROT_BY = Math.atan2(coords.y - size.y/2, coords.x - size.x/2);
@@ -106,6 +108,9 @@ function commitShape () {
 
   background = new PIXI.Sprite(PIXI.Texture.fromCanvas(bgcache.getCanvas()));
   container.addChild(background);
+
+  // When re-displaying
+  container.addChild(shapes.sprite);
 }
 
 function brush (coords) {
@@ -118,8 +123,8 @@ function brush (coords) {
 function getCoords(from, item) {
   //TODO why is this so gross
   var coords = item.data.getLocalPosition(from);
-  coords.x -= .2;
-  coords.y -= .2;
+  // coords.x -= .4;
+  // coords.y -= .4;
   return coords;
 }
 
@@ -226,7 +231,8 @@ window.onmouseup = function (item) {
 
 bgcacheSprite.mousemove = function (item) {
   var coords = getCoords(bgcacheSprite, item);
-  // updateShape(coords);
+  
+  updateShape(coords);
 
   if (lastCoords) {
     var points = calculateLine(lastCoords, coords);
@@ -245,4 +251,5 @@ bgcacheSprite.mousemove = function (item) {
  */
 
 setZoom(ZOOM_VALUE);
+addShape(coords);
 render();
