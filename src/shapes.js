@@ -1,4 +1,4 @@
-import { OutlineMesh } from './meshes';
+import { OutlineFilter } from './filters';
 
 var bgrenderer = new PIXI.WebGLRenderer(600, 600);
 
@@ -6,17 +6,11 @@ var lastTexture = new PIXI.RenderTexture(bgrenderer, 100, 100, PIXI.SCALE_MODES.
 var out = new PIXI.Sprite(lastTexture);
 
 var CAN_graphics = new PIXI.Graphics();
-// CAN_graphics.cacheAsBitmap = true;
 
 var CAN_sprite = new PIXI.Container();
-// CAN_sprite.cacheAsBitmap = true;
 CAN_sprite.addChild(CAN_graphics);
 
-// var CAN_radius = null;
-// var CAN_alias = null;
-// var CAN_stroke = null;
-
-var outline = new OutlineMesh();
+var outline = new OutlineFilter();
 
 function drawStar(ctx, cx,cy,spikes,outerRadius,innerRadius){
   var rot=Math.PI/2*3;
@@ -75,24 +69,8 @@ function drawCanvasCircle (alias, radius, rot, stroke, thickness, dofill) {
 
 
 function circleSprite (alias, radius, rot, stroke) {
-  // if (CAN_radius == radius && CAN_alias == alias && CAN_stroke == stroke) {
-  //   return;
-  // }
-  // CAN_radius = radius;
-  // CAN_alias = alias;
-  // CAN_stroke = stroke;
-
-  // radius = 6;
   var dofill = true;
   var len = drawCanvasCircle(alias, radius, rot, stroke, 1, dofill);
-
-  // sprite.anchor = new PIXI.Point(-can.width / 2, -can.height / 2);
-  // console.log(Math.floor((100 / 2) - (can.width / 2)))
-  // console.log(Math.floor((100 / 2) - (can.height / 2)))
-  // sprite.x = 20;
-  // sprite.y = 10;
-  // sprite.anchor = new PIXI.Point(50,50);
-  // console.log(sprite.anchor);
 
   if (alias && !dofill) {
     outline.setColor(
@@ -116,10 +94,6 @@ function circleSprite (alias, radius, rot, stroke) {
   } else {
     out.texture = CAN_graphics.generateTexture();
   }
-
-  // bgrenderer.resize(len, len);
-  // bgrenderer.render(CAN_sprite);
-  // lastTexture.update();
 }
 
 export default {

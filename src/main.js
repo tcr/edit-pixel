@@ -1,5 +1,6 @@
 import shapes from './shapes';
-import { GridFilter } from './meshes';
+import { GridFilter } from './filters';
+import { calculateLine } from './util';
 
 var size = {x: 50, y: 50};
 
@@ -19,18 +20,9 @@ var CIRC_CENTER = {x: 0, y: 0}
 var CIRC_COLOR = '#000000';
 var ZOOM_VALUE = 4.0;
 
-// var bg = new PIXI.CanvasRenderer(100, 100, {
-//   transparent: true,
-// });
-
 var background = new PIXI.Graphics();
 background.beginFill(0xffffff);
 background.drawRect(0, 0, size.x, size.y);
-
-// var bgsprite = new PIXI.Sprite(background);
-// var centerdot = new PIXI.Graphics();
-// centerdot.beginFill(0xff0000);
-// centerdot.drawRect(100/2 - 1, 100/2 - 1, 3, 3);
 
 var container = new PIXI.Container();
 container.addChild(background);
@@ -39,6 +31,7 @@ var bgcache = new PIXI.RenderTexture(renderer, size.x, size.y, PIXI.SCALE_MODES.
 bgcache.render(container);
 
 var bgcacheSprite = new PIXI.Sprite(bgcache);
+bgcacheSprite.interactive = true;
 
 var gridGraphics = new PIXI.Graphics();
 gridGraphics.beginFill(0xFFFF00);
@@ -53,10 +46,11 @@ var realContainer = new PIXI.Container();
 realContainer.addChild(bgcacheSprite);
 realContainer.scale.x = 1.0;
 realContainer.scale.y = 1.0;
-// realContainer.anchor.x = 0.5;
-// realContainer.anchor.y = 0.5;
 realContainer.position.x = 300 + -50;
 realContainer.position.y = 300 + -50;
+
+var lastCoords = null;
+
 
 function setZoom (value) {
   ZOOM_VALUE = value;
@@ -72,7 +66,67 @@ function setZoom (value) {
   render();
 }
 
-setZoom(ZOOM_VALUE);
+function setBrushSize(value) {
+  RADIUS_STATE = value;
+  $('#toolconf-brush-size').val(value);
+  $('#toolconf-brush-size-readout').text(value);
+  render();
+}
+
+function render() {
+  if (CIRC_DRAW) {
+    shapes.update(ALIAS_STATE, RADIUS_STATE, ROT_BY, CIRC_COLOR);
+    shapes.sprite.x = CIRC_CENTER.x - (shapes.sprite.width / 2);
+    shapes.sprite.y = CIRC_CENTER.y - (shapes.sprite.height / 2);
+  }
+  bgcache.render(container);
+  renderer.render(realContainer);
+}
+
+function updateShape (coords) {
+  if (CIRC_DRAW) {
+    // RADIUS_STATE = Math.sqrt(Math.pow(coords.x - CIRC_CENTER.x, 2) + Math.pow(coords.y - CIRC_CENTER.y, 2));
+    ROT_BY = Math.atan2(coords.y - size.y/2, coords.x - size.x/2);
+  }
+}
+
+function addShape (coords) {
+  container.addChild(shapes.sprite);
+  CIRC_CENTER.x = coords.x;
+  CIRC_CENTER.y = coords.y;
+}
+
+function commitShape () {
+  container.removeChild(shapes.sprite);
+  container.removeChild(background);
+
+  try {
+    background.destroy(true, true);
+  } catch (e) { }
+
+  background = new PIXI.Sprite(PIXI.Texture.fromCanvas(bgcache.getCanvas()));
+  container.addChild(background);
+}
+
+function brush (coords) {
+  addShape(coords);
+  updateShape(coords);
+  render();
+  commitShape();
+}
+
+function getCoords(from, item) {
+  //TODO why is this so gross
+  var coords = item.data.getLocalPosition(from);
+  coords.x -= .2;
+  coords.y -= .2;
+  return coords;
+}
+
+
+/**
+ * Event handlers
+ */
 
 $('#toolconf-zoom').on('change mousedown mouseup mousemove', function () {
   var checkbox = this;
@@ -82,13 +136,6 @@ $('#toolconf-zoom').on('change mousedown mouseup mousemove', function () {
   }, 0);
 })
 
-function setBrushSize(value) {
-  RADIUS_STATE = value;
-  $('#toolconf-brush-size').val(value);
-  $('#toolconf-brush-size-readout').text(value);
-  render();
-}
-
 $('#toolconf-brush-size').on('change mousedown mouseup mousemove', function () {
   var checkbox = this;
   setTimeout(function () {
@@ -96,7 +143,6 @@ $('#toolconf-brush-size').on('change mousedown mouseup mousemove', function () {
     setBrushSize(value);
   }, 0);
 })
-
 
 $('#toolconf-brush-grid').on('change', function () {
   if ($(this).prop('checked')) {
@@ -143,16 +189,6 @@ $('#panel-graphics').on('mousewheel', function(event) {
   }
 });
 
-function render() {
-  if (CIRC_DRAW) {
-    shapes.update(ALIAS_STATE, RADIUS_STATE, ROT_BY, CIRC_COLOR);
-    shapes.sprite.x = CIRC_CENTER.x - (shapes.sprite.width / 2);
-    shapes.sprite.y = CIRC_CENTER.y - (shapes.sprite.height / 2);
-  }
-  bgcache.render(container);
-  renderer.render(realContainer);
-}
-
 window.onkeydown = function (e) {
   if (e.keyCode == 65) {
     e.preventDefault();
@@ -166,50 +202,6 @@ window.onkeydown = function (e) {
   }
   render();
 };
-
-bgcacheSprite.interactive = true;
-
-function updateShape (coords) {
-  if (CIRC_DRAW) {
-    // RADIUS_STATE = Math.sqrt(Math.pow(coords.x - CIRC_CENTER.x, 2) + Math.pow(coords.y - CIRC_CENTER.y, 2));
-    ROT_BY = Math.atan2(coords.y - size.y/2, coords.x - size.x/2);
-  }
-}
-
-function addShape (coords) {
-  container.addChild(shapes.sprite);
-  CIRC_CENTER.x = coords.x;
-  CIRC_CENTER.y = coords.y;
-}
-
-function commitShape () {
-  container.removeChild(shapes.sprite);
-  container.removeChild(background);
-
-  try {
-    background.destroy(true, true);
-  } catch (e) { }
-
-  background = new PIXI.Sprite(PIXI.Texture.fromCanvas(bgcache.getCanvas()));
-  container.addChild(background);
-}
-
-function brush (coords) {
-  addShape(coords);
-  updateShape(coords);
-  render();
-  commitShape();
-}
-
-var lastCoords = null;
-
-function getCoords(from, item) {
-  //TODO why is this so gross
-  var coords = item.data.getLocalPosition(from);
-  coords.x -= .2;
-  coords.y -= .2;
-  return coords;
-}
 
 bgcacheSprite.mousedown = function (item) {
   CIRC_DRAW = true;
@@ -225,31 +217,6 @@ bgcacheSprite.mousedown = function (item) {
   render();
 };
 
-function line(A, B){
-  var x0 = Math.floor(A.x);
-  var x1 = Math.floor(B.x);
-  var y0 = Math.floor(A.y);
-  var y1 = Math.floor(B.y);
-
-var ret = [];
-
-   var dx = Math.abs(x1-x0);
-   var dy = Math.abs(y1-y0);
-   var sx = (x0 < x1) ? 1 : -1;
-   var sy = (y0 < y1) ? 1 : -1;
-   var err = dx-dy;
-
-   while(true){
-     ret.push({x: x0, y: y0});  // Do what you need to for this
-
-     if ((x0==x1) && (y0==y1)) break;
-     var e2 = 2*err;
-     if (e2 >-dy){ err -= dy; x0  += sx; }
-     if (e2 < dx){ err += dx; y0  += sy; }
-   }
-   return ret;
-}
-
 window.onmouseup = function (item) {
   CIRC_DRAW = false;
   // commitShape();
@@ -262,7 +229,7 @@ bgcacheSprite.mousemove = function (item) {
   // updateShape(coords);
 
   if (lastCoords) {
-    var points = line(lastCoords, coords);
+    var points = calculateLine(lastCoords, coords);
     lastCoords = coords;
     points.forEach(function (p) {
       brush(p);
@@ -272,4 +239,10 @@ bgcacheSprite.mousemove = function (item) {
   render();
 };
 
+
+/**
+ * Start
+ */
+
+setZoom(ZOOM_VALUE);
 render();

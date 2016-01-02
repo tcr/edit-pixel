@@ -1,4 +1,6 @@
-export class OutlineMesh extends PIXI.AbstractFilter {
+// Outline filter
+
+export class OutlineFilter extends PIXI.AbstractFilter {
   constructor() {
     var vertexShader = null;
     var fragmentShader = `
@@ -10,18 +12,12 @@ uniform sampler2D texture;
 uniform vec4 dimensions;
 uniform vec4 newcolor;
 
-/**
- * Draw a circle at vec2 pos with radius rad and
- * color color.
- */
-
 #define THRESH 32.0
+#define linewidth 1.0
+
 #define downsample(X) step(THRESH/255.0, X)
 #define is_black(X) (X.rgb == vec3(0.0) && X.a == 1.0)
 #define is_white(X) (!is_black(X))
-
-#define linewidth 1.0
-// #define linewidthless (linewidth-1.0)
 
 void main(void) {
   vec4 cur = downsample(texture2D(texture, vTextureCoord));
@@ -60,6 +56,9 @@ void main(void) {
     this.uniforms.newcolor.value = new Float32Array([r, g, b, a]);
   }
 }
+
+
+// Grid filter
 
 export class GridFilter extends PIXI.AbstractFilter {
   constructor() {
