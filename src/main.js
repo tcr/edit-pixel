@@ -347,15 +347,30 @@ function colorPicker (filter) {
   $(OHNO.view).width(32).height(256);
   var graphics = new PIXI.Graphics();
   graphics.beginFill(0xFFFF00);
-  // draw a rectangle
   graphics.drawRect(0, 0, 32, 256);
   graphics.filters = [filter];
   graphics.interactive = true;
-  OHNO.render(graphics);
+
+  var container = new PIXI.Container();
+  container.addChild(graphics);
+
+  var marker = new PIXI.Graphics();
+  marker.beginFill(0x000000);
+  marker.drawRect(0, -3, 16, 6);
+  container.addChild(marker);
+  marker.x = 0;
+
+  function render () {
+    OHNO.render(container);
+  };
+
   return {
     view: OHNO.view,
+    render: render,
+    filter: filter,
     target: graphics,
     height: 256,
+    marker: marker,
   };
 }
 
@@ -364,20 +379,90 @@ function colorPicker (filter) {
   var s = colorPicker(new SFilter);
   var b = colorPicker(new BFilter);
 
-  h.target.mouseup = function (event) {
-    var coords = getCoords(h.target, event);
-    var hval = coords.y / h.height;
+  function getVal (c, event) {
+    return getCoords(c.target, event).y / c.height;
+  }
 
-    var color = tinycolor({ h: hval*255, s: 255, v: 255 }).toRgb();
+  var hval = 1.0;
+  var sval = 1.0;
+  var bval = 1.0;
+
+  function updateColor () {
+    s.filter.uniforms.h.value = hval;
+    s.filter.uniforms.b.value = bval;
+    b.filter.uniforms.h.value = hval;
+    b.filter.uniforms.s.value = sval;
+
+    h.marker.y = hval * h.height;
+    s.marker.y = sval * s.height;
+    b.marker.y = bval * b.height;
+
+    var color = tinycolor.fromRatio({ h: hval, s: sval, v: bval }).toRgb();
+    console.log(hval, sval, bval);
     var brushColor = '#' + ('000000' + ((color.r << 16) + (color.g << 8) + color.b).toString(16)).slice(-6);
-    alterState({ brushColor: brushColor })
-    console.log(brushColor);
+    alterState({ brushColor: brushColor });
+
+    $('#ohno').css('backgroundColor', brushColor);
+
+    h.render();
+    s.render();
+    b.render();
+  }
+
+  $(h.view).on('mousewheel', function (event) {
+    var measure = (2/255);
+    event.preventDefault();
+    if (event.deltaY > 0) {
+      hval = Math.min(hval + measure, 1.0);
+    } else if (event.deltaY < 0) {
+      hval = Math.max(hval - measure, 0.0);
+    }
+    updateColor();
+  });
+
+  $(s.view).on('mousewheel', function (event) {
+    var measure = (2/255);
+    event.preventDefault();
+    if (event.deltaY > 0) {
+      sval = Math.min(sval + measure, 1.0);
+    } else if (event.deltaY < 0) {
+      sval = Math.max(sval - measure, 0.0);
+    }
+    updateColor();
+  });
+
+  $(b.view).on('mousewheel', function (event) {
+    var measure = (2/255);
+    event.preventDefault();
+    if (event.deltaY > 0) {
+      bval = Math.min(bval + measure, 1.0);
+    } else if (event.deltaY < 0) {
+      bval = Math.max(bval - measure, 0.0);
+    }
+    updateColor();
+  });
+
+  h.target.mouseup = function (event) {
+    hval = getVal(h, event);
+    updateColor();
+  }
+
+  s.target.mouseup = function (event) {
+    sval = getVal(s, event);
+    updateColor();
+  }
+
+  b.target.mouseup = function (event) {
+    bval = getVal(b, event);
+    updateColor();
   }
 
   $('#ohno')
     .append(h.view)
     .append(s.view)
     .append(b.view);
+
+  updateColor();
 })();
 
 

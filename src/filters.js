@@ -127,8 +127,12 @@ vec3 hsv2rgb(vec3 c) {
     return c.z * mix(K.xxx, clamp(p - K.xxx, 0.0, 1.0), c.y);
 }
 
+float roundto (float v, float by) {
+  return floor(by*v)/by;
+}
+
 void main(void) {
-  gl_FragColor = vec4(hsv2rgb(vec3(vTextureCoord.y, 1.0, 1.0)), 1.0);
+  gl_FragColor = vec4(hsv2rgb(vec3(roundto(vTextureCoord.y, 16.0), 1.0, 1.0)), 1.0);
 }
 
     `;
@@ -150,6 +154,8 @@ precision mediump float;
 
 varying vec2 vTextureCoord;
 uniform vec4 dimensions;
+uniform float h;
+uniform float b;
 
 // http://gamedev.stackexchange.com/questions/59797/glsl-shader-change-hue-saturation-brightness
 
@@ -169,8 +175,14 @@ vec3 hsv2rgb(vec3 c) {
     return c.z * mix(K.xxx, clamp(p - K.xxx, 0.0, 1.0), c.y);
 }
 
+vec4 roundto (vec4 v, float by) {
+  return floor(by*v)/by;
+}
+
 void main(void) {
-  gl_FragColor = vec4(hsv2rgb(vec3(0.0, vTextureCoord.y, 0.75)), 1.0);
+  // gl_FragColor = vec4(hsv2rgb(vec3(h, roundto(vTextureCoord.y, 16.0), b)), 1.0);
+  gl_FragColor = vec4(hsv2rgb(vec3(h, vTextureCoord.y, 0.5 + (vTextureCoord.y*.5))), 1.0);
+  // gl_FragColor = roundto(gl_FragColor, 16.0);
 }
 
     `;
@@ -179,6 +191,14 @@ void main(void) {
       dimensions: {
         type: '4fv',
         value: new Float32Array([0, 0, 0, 0])
+      },
+      h: {
+        type: 'f',
+        value: 0.0,
+      },
+      b: {
+        type: 'f',
+        value: 1.0,
       },
     });
   }
@@ -192,6 +212,8 @@ precision mediump float;
 
 varying vec2 vTextureCoord;
 uniform vec4 dimensions;
+uniform float h;
+uniform float s;
 
 // http://gamedev.stackexchange.com/questions/59797/glsl-shader-change-hue-saturation-brightness
 
@@ -211,8 +233,12 @@ vec3 hsv2rgb(vec3 c) {
     return c.z * mix(K.xxx, clamp(p - K.xxx, 0.0, 1.0), c.y);
 }
 
+float roundto (float v, float by) {
+  return floor(by*v)/by;
+}
+
 void main(void) {
-  gl_FragColor = vec4(hsv2rgb(vec3(1.0, 1.0, vTextureCoord.y)), 1.0);
+  gl_FragColor = vec4(hsv2rgb(vec3(h, s, roundto(vTextureCoord.y, 16.0))), 1.0);
 }
 
     `;
@@ -221,6 +247,14 @@ void main(void) {
       dimensions: {
         type: '4fv',
         value: new Float32Array([0, 0, 0, 0])
+      },
+      h: {
+        type: 'f',
+        value: 0.0,
+      },
+      s: {
+        type: 'f',
+        value: 1.0,
       },
     });
   }
