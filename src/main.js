@@ -309,6 +309,10 @@ function attachListeners () {
   bgcacheSprite.mousemove = function (item) {
     var coords = getCoords(bgcacheSprite, item);
 
+    if (item.data.originalEvent.shiftKey && lastCoords) {
+      coords.y = lastCoords.y;
+    }
+
     updateShape(coords);
 
     if (lastCoords) {
@@ -398,7 +402,7 @@ function colorPicker (filter) {
     b.marker.y = bval * b.height;
 
     var color = tinycolor.fromRatio({ h: hval, s: sval, v: bval }).toRgb();
-    console.log(hval, sval, bval);
+    // console.log(hval, sval, bval);
     var brushColor = '#' + ('000000' + ((color.r << 16) + (color.g << 8) + color.b).toString(16)).slice(-6);
     alterState({ brushColor: brushColor });
 
