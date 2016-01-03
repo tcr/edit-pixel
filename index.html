@@ -6,29 +6,22 @@
   </head>
   <body>
     <div id="panel-sidebar">
-  	  <h1>Puck</h1>
-	  <p>A graphics editor.</p>
-	  <div id="toolconf-brush">
-	  	<p><label><input type="checkbox" id="toolconf-brush-alias"> Alias (keyboard: <kbd>A</kbd>)</label></p>
-	  	<p><label><input type="checkbox" id="toolconf-brush-grid"> Grid  (keyboard: <kbd>G</kbd>)</label></p>
-	  	<p><label>Brush Size (<span id="toolconf-brush-size-readout">1</span>x)
-	  	  <br><input type="range" id="toolconf-brush-size" value="1" min="1" max="10"></label></p>
-	  	<p>Colors:
-	  		<button id="toolconf-color-black">Black</button>
-	  		<button id="toolconf-color-red">Red</button>
-	  		<button id="toolconf-color-green">Green</button>
-	  		<button id="toolconf-color-blue">Blue</button>
-	  		<button id="toolconf-color-yellow">Yellow</button>
-	  		<button id="toolconf-color-white">White</button>
-	  	</p>
-	  </div>
-	  <hr>
-	  <p><label>Zoom (<span id="toolconf-zoom-readout">1</span>x)</label><br>
-	    <input type="range" id="toolconf-zoom" value="4" min="1" max="10"></p>
-	  <hr>
-	  <p><a href="http://github.com/tcr/edit-pixel">File issues on Github.</a></p>
-	</div>
-	<div id="panel-graphics"></div>
+      <h1>Puck</h1>
+      <p>A graphics editor.</p>
+      <div id="toolconf-brush">
+        <p><label><input type="checkbox" id="toolconf-brush-alias"> Alias (keyboard: <kbd>A</kbd>)</label></p>
+        <p><label><input type="checkbox" id="toolconf-brush-grid"> Grid  (keyboard: <kbd>G</kbd>)</label></p>
+        <p><label>Brush Size (<span id="toolconf-brush-size-readout">1</span>x)
+          <br><input type="range" id="toolconf-brush-size" value="1" min="1" max="10"></label></p>
+      </div>
+      <hr>
+      <p><label>Zoom (<span id="toolconf-zoom-readout">1</span>x)</label><br>
+        <input type="range" id="toolconf-zoom" value="4" min="1" max="10"></p>
+      <hr>
+      <p><a href="http://github.com/tcr/edit-pixel">File issues on Github.</a></p>
+      <div id="ohno"></div>
+    </div>
+    <div id="panel-graphics"></div>
   </body>
 
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.0.0-alpha1/jquery.js"></script>
