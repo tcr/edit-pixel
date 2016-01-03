@@ -84,18 +84,18 @@ function render() {
 }
 
 function updateShape (coords) {
-  CIRC_CENTER.x = coords.x;
-  CIRC_CENTER.y = coords.y;
+  CIRC_CENTER.x = coords.x - .5;
+  CIRC_CENTER.y = coords.y - .5;
   if (CIRC_DRAW) {
     // RADIUS_STATE = Math.sqrt(Math.pow(coords.x - CIRC_CENTER.x, 2) + Math.pow(coords.y - CIRC_CENTER.y, 2));
     ROT_BY = Math.atan2(coords.y - size.y/2, coords.x - size.x/2);
   }
 }
 
-function addShape (coords) {
+function addShape () {
   container.addChild(shapes.sprite);
-  CIRC_CENTER.x = coords.x;
-  CIRC_CENTER.y = coords.y;
+  // CIRC_CENTER.x = coords.x;
+  // CIRC_CENTER.y = coords.y;
 }
 
 function commitShape () {
@@ -114,7 +114,7 @@ function commitShape () {
 }
 
 function brush (coords) {
-  addShape(coords);
+  addShape();
   updateShape(coords);
   render();
   commitShape();
@@ -231,7 +231,7 @@ window.onmouseup = function (item) {
 
 bgcacheSprite.mousemove = function (item) {
   var coords = getCoords(bgcacheSprite, item);
-  
+
   updateShape(coords);
 
   if (lastCoords) {
@@ -251,5 +251,5 @@ bgcacheSprite.mousemove = function (item) {
  */
 
 setZoom(ZOOM_VALUE);
-addShape(coords);
+addShape();
 render();
