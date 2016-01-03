@@ -3,20 +3,21 @@ import { GridFilter } from './filters';
 import { calculateLine } from './util';
 
 var size = {x: 50, y: 50};
+var frameSize = {x: 300, y: 300};
 
 // create a renderer instance
 var renderer = shapes.renderer;
 renderer.backgroundColor = 0xaaaaaa;
 $('#panel-graphics').append(renderer.view);
 
-renderer.view.style.height = '600px';
-renderer.view.style.width = '600px';
+renderer.view.style.height = '100%';
+renderer.view.style.width = '100%';
 
 var RADIUS_STATE = 0;
 var ALIAS_STATE = false;
 var ROT_BY = 0;
 var CIRC_DRAW = false;
-var CIRC_CENTER = {x: 0, y: 0}
+var CIRC_CENTER = {x: 0, y: 0};
 var CIRC_COLOR = '#000000';
 var ZOOM_VALUE = 4.0;
 
@@ -51,19 +52,22 @@ realContainer.position.y = 300 + -50;
 
 var lastCoords = null;
 
-
 function setZoom (value) {
   ZOOM_VALUE = value;
   realContainer.scale.x = value;
   realContainer.scale.y = value;
-  realContainer.position.x = 300 + -((size.x * value) / 2);
-  realContainer.position.y = 300 + -((size.y * value) / 2);
+  realContainer.position.x = frameSize.x/2 + -((size.x * value) / 2);
+  realContainer.position.y = frameSize.y/2 + -((size.y * value) / 2);
   grid.uniforms.radius.value = value;
   gridGraphics.visible = value >= 4.0;
   $('#toolconf-zoom').val(value);
   $('#toolconf-zoom-readout').text(value);
   // $('toolconf-brush-grid').prop('enabled', value >= 4.0);
   render();
+}
+
+function resize () {
+  setZoom(ZOOM_VALUE);
 }
 
 function setBrushSize(value) {
@@ -245,6 +249,20 @@ bgcacheSprite.mousemove = function (item) {
   render();
 };
 
+function triggerResize () {
+  requestAnimationFrame(function () {
+    frameSize = {
+      x: $(renderer.view).parent().width(),
+      y: $(renderer.view).parent().height(),
+    };
+    renderer.resize(frameSize.x, frameSize.y);
+    console.log(frameSize.x, frameSize.y);
+    resize();
+  });
+}
+
+$(window).on('resize', triggerResize)
+
 
 /**
  * Start
@@ -252,4 +270,4 @@ bgcacheSprite.mousemove = function (item) {
 
 setZoom(ZOOM_VALUE);
 addShape();
-render();
+triggerResize();
