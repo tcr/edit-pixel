@@ -1,19 +1,33 @@
-var path = require('path');
+const path = require('path');
+const mode = process.env.EDIT_PIXEL_ENV || 'development';
+
 module.exports = {
+  mode,
+
   entry: './src/main.js',
+
   output: {
-    path: __dirname,
-    filename: 'lib/edit.js'
+    path: path.resolve(__dirname, 'lib'),
+    filename: 'edit.js',
   },
+
+  devServer: {
+    publicPath: '/lib/',
+    compress: true,
+    host: 'localhost',
+    port: 9000,
+  },
+
   module: {
-    loaders: [
+    rules: [
       {
         test: /\.js$/,
+        include: path.resolve(__dirname, 'src'),
         loader: 'babel-loader',
-        query: {
-          presets: ['es2015']
+        options: {
+          presets: ['@babel/preset-env'],
         },
-      }
-    ]
-  }
+      },
+    ],
+  },
 };

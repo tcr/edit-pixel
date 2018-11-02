@@ -1,0 +1,17 @@
+{
+  "name": "edit-pixel",
+  "version": "1.0.0",
+  "main": "src/main.js",
+  "repository": "https://github.com/kjleitz/edit-pixel",
+  "author": "tim@timryan.org",
+  "license": "(MIT OR Apache-2.0)",
+  "private": false,
+  "dependencies": {
+    "@babel/core": "^7.1.2",
+    "@babel/preset-env": "^7.1.0",
+    "babel-loader": "^8.0.4",
+    "tinycolor2": "^1.4.1",
+    "webpack": "^4.23.1",
+    "webpack-dev-server": "^3.1.10"
+  }
+}
