@@ -11,6 +11,13 @@ module.exports = {
     filename: 'edit.js',
   },
 
+  devServer: {
+    publicPath: '/lib/',
+    compress: true,
+    host: 'localhost',
+    port: 9000,
+  },
+
   module: {
     rules: [
       {
