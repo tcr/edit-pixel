@@ -4,7 +4,7 @@
   "main": "src/main.js",
   "repository": "https://github.com/kjleitz/edit-pixel",
   "author": "tim@timryan.org",
-  "license": "MIT/Apache-2.0",
+  "license": "(MIT OR Apache-2.0)",
   "private": false,
   "dependencies": {
     "@babel/core": "^7.1.2",
