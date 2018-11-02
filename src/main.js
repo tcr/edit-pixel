@@ -84,6 +84,7 @@ var bgcacheSprite = new PIXI.Sprite(bgcache);
 bgcacheSprite.interactive = true;
 
 var gridGraphics = new PIXI.Graphics();
+// gridGraphics.beginFill(0xFFFF00);
 gridGraphics.beginFill(0xFFFF00);
 gridGraphics.drawRect(0, 0, size.x, size.y);
 gridGraphics.visible = false;
