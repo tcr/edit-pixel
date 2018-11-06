@@ -1,5 +1,5 @@
 import shapes from './shapes';
-import { GridFilter, HFilter, SFilter, BFilter } from './filters';
+import { HFilter, SFilter, BFilter } from './filters';
 import { calculateLine } from './util';
 
 import tinycolor from 'tinycolor2';
@@ -83,15 +83,6 @@ bgcache.render(container);
 var bgcacheSprite = new PIXI.Sprite(bgcache);
 bgcacheSprite.interactive = true;
 
-var gridGraphics = new PIXI.Graphics();
-gridGraphics.beginFill(0xFFFF00);
-gridGraphics.drawRect(0, 0, size.x, size.y);
-gridGraphics.visible = false;
-
-var grid = new GridFilter();
-grid.uniforms.radius.value = 1.0;
-gridGraphics.filters = [ grid ];
-
 var realContainer = new PIXI.Container();
 realContainer.addChild(bgcacheSprite);
 realContainer.scale.x = 1.0;
@@ -101,14 +92,50 @@ realContainer.position.y = frameSize.y/2 + -size.y/2;
 
 var lastCoords = null;
 
+var gridGraphics = new PIXI.Graphics();
+
+var _zoomCache = null;
+
+// drawGrid will draw the grid if it's appropriate; e.g.,
+//   - if the grid is toggled 'off' or zoom < 4, it makes the grid invisible (or,
+//     if it's unmounted, never mounts it)
+//   - if the grid is toggled 'on' and zoom >= 4, it makes the grid visible, and
+//     draws/redraws it if necessary
+var drawGrid = function(zoomVal = state.zoom) {
+  gridGraphics.visible = !!state.gridVisible && zoomVal >= 4.0;
+
+  // bail, who cares
+  if (!gridGraphics.visible) return;
+
+  // only re-draw if it's at a different zoom level than the last time it ran
+  if (_zoomCache == zoomVal) return;
+
+  realContainer.removeChild(gridGraphics);
+  gridGraphics.clear();
+  gridGraphics.lineStyle(1 / zoomVal, 0x000000, 0.15); // line width is one pixel (inverse of zoom multiplier)
+
+  for(var y = 0; y <= size.y; y += 1) {
+    gridGraphics.moveTo(0, y);
+    gridGraphics.lineTo(size.x, y);
+  }
+  for(var x = 0; x <= size.x; x += 1) {
+    gridGraphics.moveTo(x, 0);
+    gridGraphics.lineTo(x, size.y);
+  }
+
+  _zoomCache = zoomVal;
+  realContainer.addChild(gridGraphics);
+}
+
 function setZoom (value) {
   alterState({ zoom: value });
   realContainer.scale.x = value;
   realContainer.scale.y = value;
   realContainer.position.x = frameSize.x/2 + -((size.x * value) / 2);
   realContainer.position.y = frameSize.y/2 + -((size.y * value) / 2);
-  grid.uniforms.radius.value = value;
-  gridGraphics.visible = value >= 4.0;
+
+  drawGrid(value);
+
   $('#toolconf-zoom').val(value);
   $('#toolconf-zoom-readout').text(value);
   // $('toolconf-brush-grid').prop('enabled', value >= 4.0);
@@ -206,11 +233,7 @@ $('#toolconf-brush-size').on('change mousedown mouseup mousemove', function () {
 
 function setGrid (value) {
   alterState({ gridVisible: value });
-  if (value) {
-    realContainer.addChild(gridGraphics);
-  } else {
-    realContainer.removeChild(gridGraphics);
-  }
+  drawGrid();
   $('#toolconf-brush-grid').prop('checked', value);
 }
 
@@ -468,5 +491,3 @@ function colorPicker (filter) {
 
   updateColor();
 })();
-
-
